@@ -14,7 +14,7 @@ export default function Home() {
   //player
   const [playerCoordinate,setPlayerCoordinate]=useState({left:0 , top:0});
   const [playerDirection,setPlayerDirection]=useState("right");
-  const [playerBodyCoords,setPlayerBodyCoords]=useState<object[]>([]);
+  const [playerBodyCoords,setPlayerBodyCoords]=useState([]);
 
   useEffect(()=>{
     if(mapRef){
@@ -56,22 +56,22 @@ export default function Home() {
 
   function PlayerMovement(){
     if(playerDirection=="right" && playerCoordinate.left+index<mapSize){
-      setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left-index-index , top:playerCoordinate.top}])
+      // setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
       setPlayerCoordinate({left:playerCoordinate.left+index , top:playerCoordinate.top})
       return
     }
     if(playerDirection=="left" && playerCoordinate.left!=0){
-      setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
+      // setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
       setPlayerCoordinate({left:playerCoordinate.left-index , top:playerCoordinate.top})
       return
     }
     if(playerDirection=="down" && playerCoordinate.top+index<mapSize){
-      setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
+      // setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
       setPlayerCoordinate({left:playerCoordinate.left , top:playerCoordinate.top+index})
       return
     }
     if(playerDirection=="up" && playerCoordinate.top!=0){
-      setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
+      // setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}])
       setPlayerCoordinate({left:playerCoordinate.left , top:playerCoordinate.top-index})
       return
     }
@@ -96,7 +96,7 @@ export default function Home() {
           }}
         >
         {/* body */}
-        {
+        {/* {
           playerBodyCoords&&playerBodyCoords.map((coords,i)=>{
             return(
               <div
@@ -105,15 +105,15 @@ export default function Home() {
                   height:index&&index,
                   backgroundColor:"red",
                   position:"absolute",
-                  left:coords&&coords.left,
-                  top:coords&&coords.top
+                  left:coords.left
+                  top:coords.top
                 }}
                 key={i}
               >
               </div>
             )
           })
-        }
+        } */}
         </div>
       </div>
     </div>
