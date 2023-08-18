@@ -14,30 +14,43 @@ export default function Game() {
   const [index,setIndex]=useState(10);
   //which player ? (blue or red) 
   const [myColor,setMyColor]=useState("");
-  //player
+  //player blue
   const [playerCoordinate,setPlayerCoordinate]=useState({left:100 , top:100});
   const [playerDirection,setPlayerDirection]=useState("right");
   const [playerBodyCoords,setPlayerBodyCoords]=useState([]);
+  //player red
+  const [player2Coordinate,setPlayer2Coordinate]=useState({left:400 , top:400});
+  const [player2Direction,setPlayer2Direction]=useState("left");
+  const [player2BodyCoords,setPlayer2BodyCoords]=useState([]);
   const [isDead,setIsDead]=useState(false);
   //opponent
   const [opponentJoined,setOpponentJoined]=useState(false);
   const [opponent,setOpponent]=useState();
+  //drawing players
+  const [drawPlayer1Head,setDrawPlayer1Head]=useState();
+  const [drawPlayer1Body,setDrawPlayer1Body]=useState([]);
+  const [drawPlayer2Head,setDrawPlayer2Head]=useState();
+  const [drawPlayer2Body,setDrawPlayer2Body]=useState([]);
 
   function transferData(){
     lobby.publish(
       JSON.parse(data).name ,
       {
-        direction:playerDirection,
+        direction1:playerDirection,
         body:playerBodyCoords,
-        isDead:isDead,
         head:playerCoordinate,
-        number:JSON.parse(data).number
+        number:JSON.parse(data).number,
+
+        direction2:player2Direction,
+        body2:player2BodyCoords,
+        head2:player2Coordinate,
+        number2:JSON.parse(data).number
       }
     )
   }
 
   useEffect(()=>{
-    transferData();
+    // transferData();
   },[])
 
   lobby.subscribe((message)=>{
@@ -48,13 +61,17 @@ export default function Game() {
       if(JSON.parse(data).number<message.data.number){
         //my opponent has bigger number so im blue
         setMyColor("blue");
+        setDrawPlayer1Head(message.data.head);
+        setDrawPlayer2Head(message.data.head2);
+
+
       }else{
         //my opoonent has lesser number so im red
         setMyColor("red")
       }
-      // setOpponent(message.data)
+    }else{
+
     }
-    // console.log(message.name)
 
   });
 
@@ -67,38 +84,64 @@ export default function Game() {
     }
 
     window.addEventListener("keydown" , (event)=>{
-      setPlayerDirection((prevDirection) => {
-        switch (event.code) {
-          case "KeyD":
-            if (prevDirection !== "left") {
-              return "right";
-            }
-            break;
-          case "KeyA":
-            if (prevDirection !== "right") {
-              return "left";
-            }
-            break;
-          case "KeyW":
-            if (prevDirection !== "down") {
-              return "up";
-            }
-            break;
-          case "KeyS":
-            if (prevDirection !== "up") {
-              return "down";
-            }
-            break;
-        }
-        return prevDirection;
-      });
+      if(myColor=="blue"){
+        setPlayerDirection((prevDirection) => {
+          switch (event.code) {
+            case "KeyD":
+              if (prevDirection !== "left") {
+                return "right";
+              }
+              break;
+            case "KeyA":
+              if (prevDirection !== "right") {
+                return "left";
+              }
+              break;
+            case "KeyW":
+              if (prevDirection !== "down") {
+                return "up";
+              }
+              break;
+            case "KeyS":
+              if (prevDirection !== "up") {
+                console.log(playerDirection)
+                return "down";
+              }
+              break;
+          }
+          return prevDirection;
+        });
+      }else if(myColor=="red"){
+        setPlayer2Direction((prevDirection) => {
+          switch (event.code) {
+            case "KeyD":
+              if (prevDirection !== "left") {
+                return "right";
+              }
+              break;
+            case "KeyA":
+              if (prevDirection !== "right") {
+                return "left";
+              }
+              break;
+            case "KeyW":
+              if (prevDirection !== "down") {
+                return "up";
+              }
+              break;
+            case "KeyS":
+              if (prevDirection !== "up") {
+                return "down";
+              }
+              break;
+          }
+          return prevDirection;
+        });
+      }
     })
 
-    if(!localStorage.getItem("room")){
-      
-    }
-
   },[]);
+  // console.log(myColor)
 
   function PlayerMovement(){
     if(playerDirection=="right"){
@@ -134,10 +177,46 @@ export default function Game() {
     }
   }
 
+  function Player2Movement(){
+    if(player2Direction=="right"){
+      if(player2Coordinate.left+index<mapSize){
+        setPlayer2Coordinate({left:player2Coordinate.left+index , top:player2Coordinate.top})
+      }else{
+        setIsDead(true)
+      }
+    }
+
+    if(player2Direction=="left"){
+      if(player2Coordinate.left!=0){
+        setPlayer2Coordinate({left:player2Coordinate.left-index , top:player2Coordinate.top})
+      }else{
+        setIsDead(true)
+      }
+    }
+
+    if(player2Direction=="down"){
+      if(player2Coordinate.top+index<mapSize){
+        setPlayer2Coordinate({left:player2Coordinate.left , top:player2Coordinate.top+index})
+      }else{
+        setIsDead(true)
+      }
+    }
+
+    if(player2Direction=="up"){
+      if(player2Coordinate.top!=0){
+        setPlayer2Coordinate({left:player2Coordinate.left , top:player2Coordinate.top-index})
+      }else{
+        setIsDead(true)
+      }
+    }
+  }
+
   useInterval(()=>{
     if(opponentJoined){
       PlayerMovement();
+      Player2Movement();
       setPlayerBodyCoords([...playerBodyCoords , {left:playerCoordinate.left , top:playerCoordinate.top}]);
+      setPlayer2BodyCoords([...player2BodyCoords , {left:player2Coordinate.left , top:player2Coordinate.top}]);
       transferData()
     }
   },1000);
@@ -169,6 +248,37 @@ export default function Game() {
                   width:index&&index,
                   height:index&&index,
                   backgroundColor:"blue",
+                  position:"absolute",
+                  left:body.left,
+                  top:body.top,
+                  transition:"200ms"
+                }}
+                key={i}
+              >
+              </div>
+            )
+          })
+        }
+
+        <div
+          style={{
+            width:index&&index,
+            height:index&&index,
+            backgroundColor:"red",
+            position:"absolute",
+            left:player2Coordinate.left,
+            top:player2Coordinate.top,
+            transition:"200ms"
+          }}
+        ></div>
+        {
+          player2BodyCoords.map((body,i)=>{
+            return(
+              <div
+                style={{
+                  width:index&&index,
+                  height:index&&index,
+                  backgroundColor:"red",
                   position:"absolute",
                   left:body.left,
                   top:body.top,
